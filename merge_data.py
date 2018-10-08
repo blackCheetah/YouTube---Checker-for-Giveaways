@@ -23,11 +23,11 @@ def merge_files(first_file_path, second_file_path, output_file):
     
     channel_subscribers = []
 
-    with open(first_file_path, 'r',  encoding="utf8") as first_file_input:
+    with open(first_file_path, 'r', encoding="utf8") as first_file_input:
         for line in first_file_input.read().splitlines():
             channel_subscribers.append(line)
     
-    with open(second_file_path, 'r',  encoding="utf8") as second_file_input:
+    with open(second_file_path, 'r', encoding="utf8") as second_file_input:
         for i, line in enumerate(second_file_input.read().splitlines()):
             print(f"Comparing user number: [{i}], Username: ", line) 
             if line in channel_subscribers:
@@ -41,10 +41,10 @@ def merge_files(first_file_path, second_file_path, output_file):
     print(create_file(output_file, subscribers_list))
 
 def intersection_of_files(first_file_path, second_file_path, output_file):
-    with open(first_file_path, 'r',  encoding="utf8") as first_file_input:
+    with open(first_file_path, 'r', encoding="utf8") as first_file_input:
         first_file_data = set(first_file_input.read().splitlines())
 
-    with open(second_file_path, 'r',  encoding="utf8") as second_file_input:
+    with open(second_file_path, 'r', encoding="utf8") as second_file_input:
         second_file_data = set(second_file_input.read().splitlines())
 
     matched_users = first_file_data.intersection(second_file_data)

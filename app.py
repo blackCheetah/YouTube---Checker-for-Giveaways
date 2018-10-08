@@ -10,14 +10,15 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
 
-from __init__ import __version__, __author__, __created__, __description__
+from __init__ import __version__, __author__, __created__, __description__, __updated__
 # General info about the program outputted to console
 print(f"""
 ##################################################
 # YouTube Checker for Giveaways [v{__version__}] 
 # @author:      {__author__}   
 # @description: {__description__}    
-# @created:     {__created__}                    
+# @created:     {__created__}          
+# @updated:     {__updated__}          
 # Usage example:                                 
 # python app.py --channelid='<channel_id>'       
 ##################################################
@@ -120,26 +121,31 @@ def get_authenticated_service(channel_id):
 
 # Call the API's commentThreads.list method to list the existing comments.
 def get_comments(youtube, video_id, channel_id):
-    results = youtube.commentThreads().list(
-        part="snippet",
-        videoId=video_id,
-        channelId=channel_id,
-        textFormat="plainText"
-    ).execute()
 
-    authors = []
+    try:
+        results = youtube.commentThreads().list(
+            part="snippet",
+            videoId=video_id,
+            channelId=channel_id,
+            textFormat="plainText"
+        ).execute()
 
-    for item in results["items"]:
-        comment = item["snippet"]["topLevelComment"]
-        author = comment["snippet"]["authorDisplayName"]
-        text = comment["snippet"]["textDisplay"]
+        authors = []
 
-        if author not in authors:
-            authors.append(author)
+        for item in results["items"]:
+            comment = item["snippet"]["topLevelComment"]
+            author = comment["snippet"]["authorDisplayName"]
+            text = comment["snippet"]["textDisplay"]
 
-        print("Comment by %s: %s" % (author, text))
+            if author not in authors:
+                authors.append(author)
 
-    return authors
+            print("Comment by %s: %s" % (author, text))
+
+        return authors
+
+    except HttpError as e:
+        return None
 
 # Source code (modified for my needs)
 # https://stackoverflow.com/questions/37755678/retrieve-youtube-subscriptions-python-api#
@@ -269,7 +275,7 @@ if __name__ == "__main__":
     # Manual values for arguments
     # NamFlow [CZ/SK]                 -> UCPzd1WsihmmGowIlHEIHqxA
     # NamFlow - Herní Četa xD [CZ/SK] -> UC9uPfy9YSmOYk8ZXGBR2K6Q
-    # args.channelid = "UCPzd1WsihmmGowIlHEIHqxA"
+    args.channelid = "UC9uPfy9YSmOYk8ZXGBR2K6Q"
 
     if not args.channelid:
         exit("Please specify channelid using the --channelid= parameter.")
@@ -279,7 +285,6 @@ if __name__ == "__main__":
 
     # Complete list with people who commented on videos
     authors_complete_list = []
-    subscribers_list = []
 
     try:
         # Data can be accessed through this link as well
@@ -299,9 +304,12 @@ if __name__ == "__main__":
 
         # Get comments from up to 50 videos
         for video_id in video_ids_list:
-            time.sleep(1)
+            time.sleep(5)
 
             authors = get_comments(youtube, video_id, None)
+
+            if authors is None:
+                continue
 
             for author in authors:
                 if author in authors_complete_list:
@@ -319,9 +327,9 @@ if __name__ == "__main__":
         print('Subscriptions found: {}'.format(len(all_channels)))
 
         create_file_with_subscribers(f'output/{args.channelid}-subscribers.txt', all_channels_formatted)
-        
 
     except HttpError as e:
         print("An HTTP error %d occurred:\n%s" % (e.resp.status, e.content))
     else:
         print("All subscribers and comments with unique authors gathered!")
+
